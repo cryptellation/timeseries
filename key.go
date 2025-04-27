@@ -1,4 +1,4 @@
-package timeserie
+package timeseries
 
 import "time"
 
