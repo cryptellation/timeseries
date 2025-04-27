@@ -11,8 +11,7 @@ on:
 jobs:
   lint:
     name: Run linter
-    if: |
-      !startsWith(github.event.head_commit.message, 'release:')
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -26,8 +25,7 @@ jobs:
   unit-tests:
     name: Run unit tests
     needs: ["lint"]
-    if: |
-      !startsWith(github.event.head_commit.message, 'release:')
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -37,3 +35,26 @@ jobs:
           version: latest
           verb: call
           args: -s unit-tests --source-dir=. stdout 
+
+  publish-release:
+    name: Publish the release of the new version
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: dagger/dagger-for-github@8.0.0
+        with:
+          version: latest
+          verb: call
+          args: >-
+            -s publish-release
+            --source-dir=.
+            --token=env:CI_TOKEN
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
