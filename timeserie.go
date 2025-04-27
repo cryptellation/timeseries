@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-
-	"github.com/lerenn/cryptellation/pkg/utils"
 )
 
 var (
@@ -245,7 +243,7 @@ func (ts TimeSerie[T]) FirstN(limit uint) *TimeSerie[T] {
 
 // AreMissing checks if there is missing candlesticks between two times.
 func (ts TimeSerie[T]) AreMissing(start, end time.Time, interval time.Duration, limit uint) bool {
-	expectedCount := int(utils.CountBetweenTimes(start, end, interval)) + 1
+	expectedCount := int(countBetweenTimes(start, end, interval)) + 1
 	qty := ts.Len()
 
 	if qty < expectedCount && (limit == 0 || uint(qty) < limit) {
@@ -257,7 +255,7 @@ func (ts TimeSerie[T]) AreMissing(start, end time.Time, interval time.Duration, 
 
 // GetMissingTimes returns an array of missing time in the timeserie.
 func (ts TimeSerie[T]) GetMissingTimes(start, end time.Time, interval time.Duration, limit uint) []time.Time {
-	expectedCount := int(utils.CountBetweenTimes(start, end, interval)) + 1
+	expectedCount := int(countBetweenTimes(start, end, interval)) + 1
 	list := make([]time.Time, 0, expectedCount)
 	for current, count := start, uint(0); !current.After(end); current, count = current.Add(interval), count+1 {
 		_, exists := ts.Get(current)
@@ -286,4 +284,20 @@ func (ts TimeSerie[T]) ToList() []T {
 		return false, nil
 	})
 	return list
+}
+
+func countBetweenTimes(t1, t2 time.Time, interval time.Duration) int64 {
+	roundedT1 := roundDownTime(t1, interval)
+	roundedT2 := roundDownTime(t2, interval)
+
+	count := (roundedT2.Unix() - roundedT1.Unix()) / int64(interval/time.Second)
+	if count < 0 {
+		return -count
+	}
+	return count
+}
+
+func roundDownTime(t time.Time, interval time.Duration) time.Time {
+	diff := t.Unix() % int64(interval/time.Second)
+	return time.Unix(t.Unix()-diff, 0)
 }
