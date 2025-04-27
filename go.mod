@@ -1,6 +1,6 @@
 module github.com/cryptellation/timeseries
 
-go 1.24.2
+go 1.23.8
 
 require (
 	github.com/lerenn/cryptellation/pkg v0.0.0-20240821140416-f05cc1860e1a
