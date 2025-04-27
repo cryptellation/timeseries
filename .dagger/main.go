@@ -16,6 +16,7 @@ package main
 
 import (
 	"dagger/timeseries/internal/dagger"
+	"runtime"
 )
 
 type Timeseries struct{}
@@ -29,6 +30,19 @@ func (mod *Timeseries) Lint(sourceDir *dagger.Directory) *dagger.Container {
 	c = mod.withGoCodeAndCacheAsWorkDirectory(c, sourceDir)
 
 	return c.WithExec([]string{"golangci-lint", "run", "--timeout", "10m"})
+}
+
+// UnitTests returns a container that runs the unit tests.
+func (mod *Timeseries) UnitTests(sourceDir *dagger.Directory) *dagger.Container {
+	c := dag.Container().From("golang:" + goVersion() + "-alpine")
+	return mod.withGoCodeAndCacheAsWorkDirectory(c, sourceDir).
+		WithExec([]string{"sh", "-c",
+			"go test ./...",
+		})
+}
+
+func goVersion() string {
+	return runtime.Version()[2:]
 }
 
 func (mod *Timeseries) withGoCodeAndCacheAsWorkDirectory(
