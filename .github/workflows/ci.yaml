@@ -36,8 +36,8 @@ jobs:
           verb: call
           args: -s unit-tests --source-dir=. stdout 
 
-  publish-release:
-    name: Publish the release of the new version
+  publish-tag:
+    name: Publish the tag of the new version
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           version: latest
           verb: call
           args: >-
-            -s publish-release
+            -s publish-tag
             --source-dir=.
             --token=env:CI_TOKEN
         env:

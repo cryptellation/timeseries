@@ -23,7 +23,7 @@ import (
 type Timeseries struct{}
 
 // Publish a new release
-func (ci *Timeseries) PublishRelease(
+func (ci *Timeseries) PublishTag(
 	ctx context.Context,
 	sourceDir *dagger.Directory,
 	token *dagger.Secret,

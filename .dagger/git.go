@@ -78,14 +78,17 @@ func (g *Git) PublishTagFromReleaseTitle(ctx context.Context) error {
 	}
 
 	// Process newSemVer change
-	_, newSemVer, err := ProcessSemVerChange(lastTag, title)
+	change, newSemVer, err := ProcessSemVerChange(lastTag, title)
 	if err != nil {
 		return err
+	}
+	if change == SemVerChangeNone {
+		return nil
 	}
 
 	// Tag commit
 	g.container, err = g.container.
-		WithExec([]string{"git", "tag", newSemVer}).
+		WithExec([]string{"git", "tag", "v" + newSemVer}).
 		Sync(ctx)
 	if err != nil {
 		return err
