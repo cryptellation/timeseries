@@ -15,11 +15,28 @@
 package main
 
 import (
+	"context"
 	"dagger/timeseries/internal/dagger"
 	"runtime"
 )
 
 type Timeseries struct{}
+
+// Publish a new release
+func (ci *Timeseries) PublishRelease(
+	ctx context.Context,
+	sourceDir *dagger.Directory,
+	token *dagger.Secret,
+) error {
+	// Create Git repo access
+	repo, err := NewGit(ctx, sourceDir, token)
+	if err != nil {
+		return err
+	}
+
+	// Publish new tag
+	return repo.PublishTagFromReleaseTitle(ctx)
+}
 
 // Lint runs golangci-lint on the source code in the given directory.
 func (mod *Timeseries) Lint(sourceDir *dagger.Directory) *dagger.Container {
