@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"dagger/timeseries/internal/dagger"
 	"strings"
+
+	"github.com/cryptellation/version/dagger/internal/dagger"
 )
 
 // Git provides access to a git repository.
