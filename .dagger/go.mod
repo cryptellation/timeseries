@@ -1,4 +1,4 @@
-module github.com/cryptellation/version/dagger
+module github.com/cryptellation/timeseries/dagger
 
 go 1.23.8
 
