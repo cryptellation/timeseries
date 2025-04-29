@@ -18,7 +18,7 @@ import (
 	"context"
 	"runtime"
 
-	"github.com/cryptellation/version/dagger/internal/dagger"
+	"github.com/cryptellation/timeseries/dagger/internal/dagger"
 )
 
 type Timeseries struct{}
