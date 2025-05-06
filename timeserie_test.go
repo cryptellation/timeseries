@@ -436,3 +436,18 @@ func (suite *TimeSerieSuite) TestToList() {
 	suite.Require().Equal(int64(2), list[2])
 	suite.Require().Equal(int64(3), list[3])
 }
+
+func (suite *TimeSerieSuite) TestToArray() {
+	ts := New[int64]()
+	for i := int64(3); i >= 0; i-- {
+		ts.Set(time.Unix(60*i, 0), i)
+	}
+
+	list := ts.ToArray()
+	suite.Require().Len(list, 4)
+
+	suite.Require().Equal(int64(0), list[0])
+	suite.Require().Equal(int64(1), list[1])
+	suite.Require().Equal(int64(2), list[2])
+	suite.Require().Equal(int64(3), list[3])
+}
