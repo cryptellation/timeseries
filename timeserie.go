@@ -3,6 +3,7 @@ package timeseries
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -300,4 +301,26 @@ func countBetweenTimes(t1, t2 time.Time, interval time.Duration) int64 {
 func roundDownTime(t time.Time, interval time.Duration) time.Time {
 	diff := t.Unix() % int64(interval/time.Second)
 	return time.Unix(t.Unix()-diff, 0)
+}
+
+// ToArray converts the TimeSerie to an array of values.
+func (ts TimeSerie[T]) ToArray() []T {
+	list := make([]T, 0, ts.Len())
+	_ = ts.Loop(func(t time.Time, obj T) (bool, error) {
+		list = append(list, obj)
+		return false, nil
+	})
+	return list
+}
+
+// String returns a string representation of the TimeSerie.
+func (ts TimeSerie[T]) String() string {
+	txt := fmt.Sprintf("%-25s %s\n", "TIME", "CONTENT")
+
+	_ = ts.Loop(func(t time.Time, obj T) (bool, error) {
+		txt += fmt.Sprintf("%-25s %+v\n", t.Format(time.RFC3339), obj)
+		return false, nil
+	})
+
+	return txt
 }
