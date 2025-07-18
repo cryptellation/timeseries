@@ -306,7 +306,7 @@ func roundDownTime(t time.Time, interval time.Duration) time.Time {
 // ToArray converts the TimeSerie to an array of values.
 func (ts TimeSerie[T]) ToArray() []T {
 	list := make([]T, 0, ts.Len())
-	_ = ts.Loop(func(t time.Time, obj T) (bool, error) {
+	_ = ts.Loop(func(_ time.Time, obj T) (bool, error) {
 		list = append(list, obj)
 		return false, nil
 	})
