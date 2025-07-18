@@ -23,7 +23,7 @@ import (
 
 type Timeseries struct{}
 
-// Publish a new release
+// Publish a new release.
 func (ci *Timeseries) PublishTag(
 	ctx context.Context,
 	sourceDir *dagger.Directory,
@@ -45,29 +45,35 @@ func (ci *Timeseries) PublishTag(
 }
 
 // Check returns a container that runs the checker.
-func (mod *Timeseries) Check(
+func (ci *Timeseries) Check(
 	sourceDir *dagger.Directory,
 ) *dagger.Container {
 	c := dag.Container().From("ghcr.io/cryptellation/checker")
-	return mod.withGoCodeAndCacheAsWorkDirectory(c, sourceDir).
+	return ci.withGoCodeAndCacheAsWorkDirectory(c, sourceDir).
 		WithExec([]string{"checker", "--check-test-tags=false"})
 }
 
 // Lint runs golangci-lint on the source code in the given directory.
-func (mod *Timeseries) Lint(sourceDir *dagger.Directory) *dagger.Container {
+func (ci *Timeseries) Lint(sourceDir *dagger.Directory) *dagger.Container {
 	c := dag.Container().
 		From("golangci/golangci-lint:v1.62.0").
 		WithMountedCache("/root/.cache/golangci-lint", dag.CacheVolume("golangci-lint"))
 
-	c = mod.withGoCodeAndCacheAsWorkDirectory(c, sourceDir)
+	c = ci.withGoCodeAndCacheAsWorkDirectory(c, sourceDir)
 
-	return c.WithExec([]string{"golangci-lint", "run", "--timeout", "10m"})
+	// Lint main repo
+	c = c.WithExec([]string{"golangci-lint", "run", "--timeout", "10m", "./..."})
+
+	// Lint .dagger directory using parent config and module context
+	c = c.WithExec([]string{"sh", "-c", "cd .dagger && golangci-lint run --config ../.golangci.yml --timeout 10m ."})
+
+	return c
 }
 
 // UnitTests returns a container that runs the unit tests.
-func (mod *Timeseries) UnitTests(sourceDir *dagger.Directory) *dagger.Container {
+func (ci *Timeseries) UnitTests(sourceDir *dagger.Directory) *dagger.Container {
 	c := dag.Container().From("golang:" + goVersion() + "-alpine")
-	return mod.withGoCodeAndCacheAsWorkDirectory(c, sourceDir).
+	return ci.withGoCodeAndCacheAsWorkDirectory(c, sourceDir).
 		WithExec([]string{"sh", "-c",
 			"go test ./...",
 		})
@@ -77,7 +83,7 @@ func goVersion() string {
 	return runtime.Version()[2:]
 }
 
-func (mod *Timeseries) withGoCodeAndCacheAsWorkDirectory(
+func (ci *Timeseries) withGoCodeAndCacheAsWorkDirectory(
 	c *dagger.Container,
 	sourceDir *dagger.Directory,
 ) *dagger.Container {
